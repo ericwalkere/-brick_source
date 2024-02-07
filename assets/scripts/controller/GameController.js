@@ -1,3 +1,5 @@
+const { registerEvent } = require("EventHelper");
+const Code = require("EventCode");
 
 cc.Class({
     extends: cc.Component,
@@ -6,28 +8,35 @@ cc.Class({
         ball: require("Ball"),
         bricks: require("Bricks"),
         paddle: require("Paddle"),
+        menu: require("MenuController"),
     },
 
     onLoad() {
-        this.physicsManager = cc.director.getPhysicsManager();
-        this.physicsManager.enabled = true;
+        this.initEvent();
         this.init();
     },
 
-    init() {
-        const arr = [
-            [0, 1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 2, 2, 4, 4, 4, 2, 2, 1],
-            [2, 3, 3, 3, 3, 3, 3, 3, 2],
-            [3, 1, 0, 0, 0, 0, 0, 1, 3],
-            [3, 2, 2, 2, 2, 2, 2, 2, 3],
-            [2, 4, 4, 4, 4, 4, 4, 4, 2],
-            [1, 1, 0, 0, 0, 0, 0, 1, 1],
-        ];
+    initEvent() {
+        registerEvent(Code.GAME.GET_LEVEL, this.getLevel, this);
+        registerEvent(Code.GAME.START, this.startGame, this);
+    },
 
-        this.ball.init(this);
+    init() {
+        this.physicsManager = cc.director.getPhysicsManager();
+        this.physicsManager.enabled = true;
+    },
+
+    getLevel(level, num) {
+        this.level = level;
+        this.num = num;
+    },
+
+    startGame() {
+        this.resumeGame();
         this.paddle.init();
-        this.bricks.init(arr);
+        this.ball.init(this, this.num);
+        this.bricks.init(this.level);
+        this.menu.closePanel();
     },
 
     pauseGame() {
@@ -38,12 +47,9 @@ cc.Class({
         this.physicsManager.enabled = true;
     },
 
-    stopGame() {
-        this.physicsManager.enabled = false;
-    },
-
     contactWithGround() {
-        this.stopGame();
+        this.menu.openEnd();
+        this.pauseGame();
     },
 
     contactWithBricks(block) {

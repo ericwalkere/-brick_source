@@ -27,9 +27,7 @@ cc.Class({
 
     takeDamage(damage) {
         if (!this._canAttack) return;
-
         this._currentHP = mathf.clamp(this._currentHP - damage, 1, this.maxHP);
-        cc.log(this._currentHP);
 
         if (this._currentHP > 1) {
             this.setColor(this._currentHP);
